@@ -22,6 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <stdio.h>
+#include <string.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,6 +45,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+TIM_HandleTypeDef htim6;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -53,6 +58,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -60,10 +66,27 @@ static void MX_ADC1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//#define UART_SPEED 115200
+//#define UART_SPEED 921600  // 104 uSEc
+#define UART_SPEED 1843200 // 52  uSec 
+
+
+
+
+//#define ROW_LEN  (512)
+#define ROW_LEN  (1536)
+
+uint32_t row_count = 0;
 
 uint32_t raw_adc1_ch1_val = 0;
 uint32_t raw_adc1_ch2_val = 0;
 uint32_t raw_adc1_ch3_val = 0;
+
+
+uint8_t msg_bug[32];
+int msg_len = 0;
+
+
 
 
 /* USER CODE END 0 */
@@ -98,6 +121,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -107,18 +131,56 @@ int main(void)
   
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
   
+  HAL_TIM_Base_Start(&htim6);
+  
   while (1)
   {
+
+    HAL_GPIO_WritePin(Debug_GPIO_Port, Debug_Pin, GPIO_PIN_SET);  
+      
     HAL_ADCEx_InjectedStart(&hadc1);
+    
+    __HAL_TIM_SET_COUNTER(&htim6, 0);
     
     HAL_ADCEx_InjectedPollForConversion(&hadc1, 1);
     
-    HAL_Delay(1);
+    //HAL_Delay(1);
     
     raw_adc1_ch1_val = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
     raw_adc1_ch2_val = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_2);
     raw_adc1_ch3_val = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_3);    
-      
+    
+    double data1 = raw_adc1_ch1_val;
+    
+    
+    if(row_count < (ROW_LEN - 1) )
+    {
+        row_count += 1;
+        
+        msg_len = sprintf((char*)msg_bug, "%.4f ", data1);  // 28 uSec
+    }
+    else
+    {
+        row_count = 0;
+        
+        msg_len = sprintf((char*)msg_bug, "%.4f\n", data1);  // 28 uSec
+    }
+     
+
+    HAL_UART_Transmit(&huart2, msg_bug, msg_len, 1);  // 102 uSec
+                         
+    
+    
+    HAL_GPIO_WritePin(Debug_GPIO_Port, Debug_Pin, GPIO_PIN_RESET);  
+    //HAL_GPIO_TogglePin(Debug_GPIO_Port, Debug_Pin);
+    
+    
+    while( __HAL_TIM_GET_COUNTER(&htim6) < 10 )  // 1 msec delay
+    {    
+    }
+    
+    
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -296,6 +358,44 @@ static void MX_ADC1_Init(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 7999;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 65535;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -311,7 +411,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 921600;
+  huart2.Init.BaudRate = UART_SPEED; //921600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
