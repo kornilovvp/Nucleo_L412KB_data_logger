@@ -1,0 +1,15 @@
+"C:\ProgramFilesIAR9\IAR Systems\Embedded Workbench 9.1\arm\bin\armPROC.dll" 
+
+"C:\ProgramFilesIAR9\IAR Systems\Embedded Workbench 9.1\arm\bin\armSTLINK.dll" 
+
+"C:\temp\repositories\Nucleo_L412_data_logger\nucleo_L412_data_logger\EWARM\nucleo_L412_data_logger\Exe\nucleo_L412_data_logger.out" 
+
+--plugin="C:\ProgramFilesIAR9\IAR Systems\Embedded Workbench 9.1\arm\bin\armbat.dll" 
+
+--device_macro="C:\ProgramFilesIAR9\IAR Systems\Embedded Workbench 9.1\arm/config/debugger/ST/STM32L4xx.dmac" 
+
+--flash_loader="C:\ProgramFilesIAR9\IAR Systems\Embedded Workbench 9.1\arm/config/flashloader/ST/FlashSTM32L41xxB.board" 
+
+
+
+
