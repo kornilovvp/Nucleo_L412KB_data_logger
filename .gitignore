@@ -1,3 +1,7 @@
 nucleo_L412_data_logger/EWARM/nucleo_L412_data_logger/Obj/
 nucleo_L412_data_logger/EWARM/nucleo_L412_data_logger/BrowseInfo/
 nucleo_L412_data_logger/EWARM/nucleo_L412_data_logger/List/
+nucleo_L412_data_logger/EWARM/nucleo_L412_data_logger/Exe/nucleo_L412_data_logger.sim
+nucleo_L412_data_logger/EWARM/nucleo_L412_data_logger/.ninja_deps
+nucleo_L412_data_logger/EWARM/nucleo_L412_data_logger/.ninja_log
+nucleo_L412_data_logger/EWARM/nucleo_L412_data_logger/Exe/nucleo_L412_data_logger.out

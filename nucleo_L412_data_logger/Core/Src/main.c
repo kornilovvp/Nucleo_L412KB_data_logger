@@ -60,6 +60,12 @@ static void MX_ADC1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+
+uint32_t raw_adc1_ch1_val = 0;
+uint32_t raw_adc1_ch2_val = 0;
+uint32_t raw_adc1_ch3_val = 0;
+
+
 /* USER CODE END 0 */
 
 /**
@@ -98,8 +104,21 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  
+  HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
+  
   while (1)
   {
+    HAL_ADCEx_InjectedStart(&hadc1);
+    
+    HAL_ADCEx_InjectedPollForConversion(&hadc1, 1);
+    
+    HAL_Delay(1);
+    
+    raw_adc1_ch1_val = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
+    raw_adc1_ch2_val = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_2);
+    raw_adc1_ch3_val = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_3);    
+      
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
